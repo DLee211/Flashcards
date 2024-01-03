@@ -31,9 +31,9 @@ public class UserInput
                 case "1":
                     Stack.ManageStacks();
                     break;
-                // case "2":
-                //     ManageFlashCards();
-                //     break;
+                case "2":
+                    Flashcard.ManageFlashCards();
+                    break;
                 // case "3":
                 //     Study();
                 //     break;

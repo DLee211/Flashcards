@@ -47,7 +47,7 @@ public class Stack
         UserInput.Input();
     }
 
-    private static void ViewStacks()
+    public static void ViewStacks()
     {
         string GetStackNames = "SELECT StackName FROM Stacks;";
 
