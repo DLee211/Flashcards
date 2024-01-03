@@ -1,4 +1,5 @@
-﻿using System.Net.NetworkInformation;
+﻿using System.Linq.Expressions;
+using System.Net.NetworkInformation;
 using Microsoft.Data.SqlClient;
 
 namespace Flashcards;
@@ -17,10 +18,25 @@ public class Flashcard
         Console.WriteLine("Input a current stack name");
         Console.WriteLine("or Input 0 to exit input");
         Console.WriteLine("-------------------------------");
-        string stackName= Console.ReadLine();
         
-        string query = $"SELECT StackId FROM Stacks WHERE StackName ='{stackName}'";
+        string stackName= Console.ReadLine();
 
+        switch (stackName)
+        {
+            case "0":
+                UserInput.Input();
+                break;
+            
+            default:
+                string query = $"SELECT StackId FROM Stacks WHERE StackName ='{stackName}'";
+
+                ChooseStack(query, stackName);
+                break;
+        }
+    }
+
+    private static void ChooseStack(string query, string? stackName)
+    {
         using (SqlConnection connection = new SqlConnection(connectionString))
         {
             connection.Open();
@@ -42,8 +58,6 @@ public class Flashcard
             
             connection.Close();
         }
-        
-        UserInput.Input();
     }
 
     private static void currentStackFlashCards(string stackName, int stackId)
@@ -61,5 +75,68 @@ public class Flashcard
         Console.WriteLine("-------------------------------");
 
         string input = Console.ReadLine();
+
+        switch (input)
+        {
+            case "0":
+                break;
+            
+            case "x":
+                Console.Clear();
+                Stack.ViewStacks();
+                Console.WriteLine("Change to which Stack?");
+                
+                string newstackName= Console.ReadLine();
+        
+                string query = $"SELECT StackId FROM Stacks WHERE StackName ='{newstackName}'";
+
+                ChooseStack(query, newstackName);
+                break;
+            
+            /*case "v":
+                ViewAllFlashCards();
+                break;*/
+            
+            /*case "a":
+                ViewXAmountOfCards():
+                break;*/
+            
+            case "c":
+                CreateFlashcard(stackName, stackId);
+                break;
+            
+            /*case "e":
+                EditFlashcard(stackId);
+                break;*/
+            
+            /*case "d":
+                DeleteFlashcard(stackId);
+                break;*/
+        }
+    }
+
+    private static void CreateFlashcard(string stackName, int stackId)
+    {
+        Console.Clear();
+        Console.WriteLine("Input the question here:");
+        string Question = Console.ReadLine();
+        
+        Console.WriteLine("Input the answer here:");
+        string Answer = Console.ReadLine();
+
+        string query = $"INSERT INTO Flashcards (Question, Answer, StackId) VALUES ('{Question}', '{Answer}', {stackId});";
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+            
+            using (SqlCommand command = new SqlCommand(query, connection))
+            {
+                command.ExecuteNonQuery();
+            }
+            connection.Close();
+        }
+        
+        currentStackFlashCards(stackName, stackId);
     }
 }
