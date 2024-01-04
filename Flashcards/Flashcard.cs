@@ -112,9 +112,38 @@ public class Flashcard
                 EditFlashcard(stackId);
                 break;*/
             
-            /*case "d":
-                DeleteFlashcard(stackId);
-                break;*/
+            case "d":
+                DeleteFlashcard(stackName, stackId);
+                break;
+        }
+    }
+
+    private static void DeleteFlashcard(string stackName, int stackId)
+    {
+        ViewAllFlashCards(stackName,stackId);
+        Console.WriteLine("Input the id of the flashcard you want to delete:");
+        string id = Console.ReadLine();
+
+        int Id;
+        
+        while (!int.TryParse(id, out Id))
+        {
+            Console.WriteLine("Id has to be an integer!");
+            id = Console.ReadLine();
+        }
+
+        string query =
+            $"DECLARE @YourFlashcardId INT; SELECT @YourFlashcardId = FlashcardId FROM (SELECT FlashcardId, ROW_NUMBER() OVER (ORDER BY FlashcardId) AS ContinuousFlashcardId FROM Flashcards WHERE StackId = {stackId}) AS NumberedFlashcards WHERE ContinuousFlashcardId = {Id}; DELETE FROM Flashcards WHERE FlashcardId = @YourFlashcardId AND StackId = {stackId}";
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+            {
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                }
+            }
+            connection.Close();
         }
     }
 
