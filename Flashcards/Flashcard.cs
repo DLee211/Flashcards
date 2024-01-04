@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Net.NetworkInformation;
+using ConsoleTableExt;
 using Microsoft.Data.SqlClient;
 
 namespace Flashcards;
@@ -93,9 +94,11 @@ public class Flashcard
                 ChooseStack(query, newstackName);
                 break;
             
-            /*case "v":
-                ViewAllFlashCards();
-                break;*/
+            case "v":
+                ViewAllFlashCards(stackName, stackId);
+                Console.ReadLine();
+                currentStackFlashCards(stackName, stackId);
+                break;
             
             /*case "a":
                 ViewXAmountOfCards():
@@ -112,6 +115,48 @@ public class Flashcard
             /*case "d":
                 DeleteFlashcard(stackId);
                 break;*/
+        }
+    }
+
+    private static void ViewAllFlashCards(string stackName, int stackId)
+    {
+        string query = $"WITH NumberedFlashcards AS (SELECT FlashcardId, Question, Answer, ROW_NUMBER() OVER (ORDER BY FlashcardId) AS ContinuousFlashcardId FROM Flashcards WHERE StackId = {stackId})SELECT ContinuousFlashcardId, Question, Answer FROM NumberedFlashcards;";
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+            var tableData = new List<List<object>> { };
+            using (SqlCommand command = new SqlCommand(query, connection))
+            {
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            List<object> rowData = new List<object>
+                            {
+                                reader.GetInt64(0),
+                                reader.GetString(1),
+                                reader.GetString(2)
+                            };
+                            tableData.Add(rowData);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No data found!");
+                    }
+                    
+                    Console.Clear();
+
+                    ConsoleTableBuilder
+                        .From(tableData)
+                        .WithTitle($"{stackName} Flashcards", ConsoleColor.Yellow, ConsoleColor.DarkGray)
+                        .WithColumn("FlashcardId", "Question","Answer")
+                        .WithFormat(ConsoleTableBuilderFormat.Alternative)
+                        .ExportAndWriteLine(TableAligntment.Center);
+                }
+            }
         }
     }
 
