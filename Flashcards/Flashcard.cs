@@ -104,14 +104,46 @@ public class Flashcard
                     CreateFlashcard(stackName, stackId);
                     break;
 
-                /*case "e":
+                case "e":
+                    ViewAllFlashCards(stackName, stackId);
                     EditFlashcard(stackId);
-                    break;*/
+                    break;
 
                 case "d":
-                    DeleteFlashcard(stackName, stackId);
+                    ViewAllFlashCards(stackName,stackId);
+                    DeleteFlashcard( stackId);
                     break;
             }
+        }
+    }
+
+    private static void EditFlashcard(int stackId)
+    {
+        Console.WriteLine("Input the Id of the flashcard you want to edit:");
+
+        int continuousFlashcardId = int.Parse(Console.ReadLine());
+
+        Console.WriteLine("Input in the new question:");
+
+        string newQuestion = Console.ReadLine();
+
+        Console.WriteLine("Input the new answer:");
+
+        string newAnswer = Console.ReadLine();
+
+        string query =
+            $"DECLARE @stackId INT = {stackId}; DECLARE @continuousFlashcardId INT = {continuousFlashcardId}; UPDATE Flashcards SET Question = '{newQuestion}', Answer = '{newAnswer}' WHERE FlashcardId = (SELECT FlashcardId FROM(SELECT FlashcardId, ROW_NUMBER() OVER (ORDER BY FlashcardId) AS ContinuousFlashcardId FROM Flashcards WHERE StackId =  @stackId) AS NumberedFlashcards WHERE ContinuousFlashcardId = @continuousFlashcardId) AND StackId = @stackId;";
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+            {
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+            connection.Close();
         }
     }
 
@@ -136,9 +168,8 @@ public class Flashcard
         }
     }
 
-    private static void DeleteFlashcard(string stackName, int stackId)
+    private static void DeleteFlashcard(int stackId)
     {
-        ViewAllFlashCards(stackName,stackId);
         Console.WriteLine("Input the id of the flashcard you want to delete:");
         string id = Console.ReadLine();
 
