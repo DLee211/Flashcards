@@ -7,7 +7,7 @@ public class UserInput
     public static void Input()
     {
         Console.Clear();
-        Console.WriteLine("\nMenu");
+        Console.WriteLine("\nMain Menu");
         Console.WriteLine("What do you want to do?");
         Console.WriteLine("--------------------------------------------");
         Console.WriteLine("\n0: Exit");

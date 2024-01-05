@@ -63,9 +63,8 @@ public class Flashcard
 
     private static void currentStackFlashCards(string stackName, int stackId)
     {
-        bool flag = true;
 
-        while (flag == true)
+        while (true)
         {
             Console.Clear();
             Console.WriteLine($"Current working stack: {stackName}");
@@ -84,19 +83,11 @@ public class Flashcard
             switch (input)
             {
                 case "0":
-                    flag = false;
+                    UserInput.Input();
                     break;
 
                 case "x":
-                    Console.Clear();
-                    Stack.ViewStacks();
-                    Console.WriteLine("Change to which Stack?");
-
-                    string newstackName = Console.ReadLine();
-
-                    string query = $"SELECT StackId FROM Stacks WHERE StackName ='{newstackName}'";
-
-                    ChooseStack(query, newstackName);
+                    ManageFlashCards();
                     break;
 
                 case "v":
@@ -105,9 +96,9 @@ public class Flashcard
                     currentStackFlashCards(stackName, stackId);
                     break;
 
-                /*case "a":
-                    ViewXAmountOfCards():
-                    break;*/
+                case "a":
+                    ViewXAmountOfCards(stackId);
+                    break;
 
                 case "c":
                     CreateFlashcard(stackName, stackId);
@@ -121,6 +112,27 @@ public class Flashcard
                     DeleteFlashcard(stackName, stackId);
                     break;
             }
+        }
+    }
+
+    private static void ViewXAmountOfCards(int stackId)
+    {
+        string query = $"SELECT COUNT(*) FROM Flashcards WHERE StackId = {stackId} ";
+        
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+            {
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    int rowCount = (int)command.ExecuteScalar();
+                    
+                    Console.WriteLine($"There are {rowCount} cards in this stack.");
+                    Console.WriteLine("Press Enter to continue:");
+                    Console.ReadLine();
+                }
+            }
+            connection.Close();
         }
     }
 
