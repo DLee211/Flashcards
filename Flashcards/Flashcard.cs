@@ -63,58 +63,94 @@ public class Flashcard
 
     private static void currentStackFlashCards(string stackName, int stackId)
     {
-        Console.Clear();
-        Console.WriteLine($"Current working stack: {stackName}");
-        Console.WriteLine("-------------------------------");
-        Console.WriteLine("0 to return to main menu");
-        Console.WriteLine("x to change current stack");
-        Console.WriteLine("v to view all flashcards in stack");
-        Console.WriteLine("a to view x amount of cards in stack");
-        Console.WriteLine("c to create a flashcard in current stack");
-        Console.WriteLine("e to edit a flashcard");
-        Console.WriteLine("d to delete a flashcard");
-        Console.WriteLine("-------------------------------");
+        bool flag = true;
 
-        string input = Console.ReadLine();
-
-        switch (input)
+        while (flag == true)
         {
-            case "0":
-                break;
-            
-            case "x":
-                Console.Clear();
-                Stack.ViewStacks();
-                Console.WriteLine("Change to which Stack?");
-                
-                string newstackName= Console.ReadLine();
-        
-                string query = $"SELECT StackId FROM Stacks WHERE StackName ='{newstackName}'";
+            Console.Clear();
+            Console.WriteLine($"Current working stack: {stackName}");
+            Console.WriteLine("-------------------------------");
+            Console.WriteLine("0 to return to main menu");
+            Console.WriteLine("x to change current stack");
+            Console.WriteLine("v to view all flashcards in stack");
+            Console.WriteLine("a to view x amount of cards in stack");
+            Console.WriteLine("c to create a flashcard in current stack");
+            Console.WriteLine("e to edit a flashcard");
+            Console.WriteLine("d to delete a flashcard");
+            Console.WriteLine("-------------------------------");
 
-                ChooseStack(query, newstackName);
-                break;
-            
-            case "v":
-                ViewAllFlashCards(stackName, stackId);
-                Console.ReadLine();
-                currentStackFlashCards(stackName, stackId);
-                break;
-            
-            /*case "a":
-                ViewXAmountOfCards():
-                break;*/
-            
-            case "c":
-                CreateFlashcard(stackName, stackId);
-                break;
-            
-            /*case "e":
-                EditFlashcard(stackId);
-                break;*/
-            
-            /*case "d":
-                DeleteFlashcard(stackId);
-                break;*/
+            string input = Console.ReadLine();
+
+            switch (input)
+            {
+                case "0":
+                    flag = false;
+                    break;
+
+                case "x":
+                    Console.Clear();
+                    Stack.ViewStacks();
+                    Console.WriteLine("Change to which Stack?");
+
+                    string newstackName = Console.ReadLine();
+
+                    string query = $"SELECT StackId FROM Stacks WHERE StackName ='{newstackName}'";
+
+                    ChooseStack(query, newstackName);
+                    break;
+
+                case "v":
+                    ViewAllFlashCards(stackName, stackId);
+                    Console.ReadLine();
+                    currentStackFlashCards(stackName, stackId);
+                    break;
+
+                /*case "a":
+                    ViewXAmountOfCards():
+                    break;*/
+
+                case "c":
+                    CreateFlashcard(stackName, stackId);
+                    break;
+
+                /*case "e":
+                    EditFlashcard(stackId);
+                    break;*/
+
+                case "d":
+                    DeleteFlashcard(stackName, stackId);
+                    break;
+            }
+        }
+    }
+
+    private static void DeleteFlashcard(string stackName, int stackId)
+    {
+        ViewAllFlashCards(stackName,stackId);
+        Console.WriteLine("Input the id of the flashcard you want to delete:");
+        string id = Console.ReadLine();
+
+        int Id;
+        
+        while (!int.TryParse(id, out Id))
+        {
+            Console.WriteLine("Id has to be an integer!");
+            id = Console.ReadLine();
+        }
+
+        string query =
+            $"DECLARE @YourFlashcardId INT; SELECT @YourFlashcardId = FlashcardId FROM (SELECT FlashcardId, ROW_NUMBER() OVER (ORDER BY FlashcardId) AS ContinuousFlashcardId FROM Flashcards WHERE StackId = {stackId}) AS NumberedFlashcards WHERE ContinuousFlashcardId = {Id}; DELETE FROM Flashcards WHERE FlashcardId = @YourFlashcardId AND StackId = {stackId}";
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+            {
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+            connection.Close();
         }
     }
 
