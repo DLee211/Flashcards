@@ -34,9 +34,9 @@ public class UserInput
                 case "2":
                     Flashcard.ManageFlashCards();
                     break;
-                // case "3":
-                //     Study();
-                //     break;
+                case "3": 
+                    StudySession.Study(); 
+                    break;
                 // case "4":
                 //     ViewStudyData();
                 //     break;

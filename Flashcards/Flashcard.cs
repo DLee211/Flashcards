@@ -36,7 +36,7 @@ public class Flashcard
         }
     }
 
-    private static void ChooseStack(string query, string? stackName)
+    public static void ChooseStack(string query, string? stackName)
     {
         using (SqlConnection connection = new SqlConnection(connectionString))
         {

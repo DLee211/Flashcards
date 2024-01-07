@@ -63,13 +63,14 @@ public class Stack
             }
 
             var tableData = new List<List<object>> { };
+            List<object> rowData = null;
             using (SqlDataReader reader = command.ExecuteReader())
             {
                 if (reader.HasRows)
                 {
                     while (reader.Read())
                     {
-                        List<object> rowData = new List<object>
+                        rowData = new List<object>
                         {
                             reader.GetString(0)
                         };
@@ -81,14 +82,15 @@ public class Stack
                 {
                     Console.WriteLine("No data found!");
                 }
-                
-                ConsoleTableBuilder
-                    .From(tableData)
-                    .WithTitle("Stacks ", ConsoleColor.Yellow, ConsoleColor.DarkGray)
-                    .WithColumn("Name")
-                    .WithFormat(ConsoleTableBuilderFormat.Alternative)
-                    .ExportAndWriteLine(TableAligntment.Left);
             }
+            ConsoleTableBuilder
+                .From(tableData)
+                .WithTitle("Stacks ", ConsoleColor.Yellow, ConsoleColor.DarkGray)
+                .WithColumn("Name")
+                .ExportAndWriteLine(TableAligntment.Left);
+            
+            rowData.Clear();
+            tableData.Clear();
         }
     }
 }
