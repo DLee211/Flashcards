@@ -6,25 +6,26 @@ public class StudySession
 {
     private static string connectionString = @"Data Source = (localdb)\MSSQLLocalDB;Integrated Security=True";
     static int stackId;
+
     public static void Study()
     {
         Console.Clear();
         Stack.ViewStacks();
         Console.WriteLine("Choose stack to study.");
-        
+
         Console.WriteLine("-------------------------------");
         Console.WriteLine("Input a current stack name");
         Console.WriteLine("or Input 0 to exit input");
         Console.WriteLine("-------------------------------");
-        
-        string stackName= Console.ReadLine();
+
+        string stackName = Console.ReadLine();
 
         switch (stackName)
         {
             case "0":
                 UserInput.Input();
                 break;
-            
+
             default:
                 string query = $"SELECT StackId FROM Stacks WHERE StackName ='{stackName}'";
 
@@ -53,24 +54,51 @@ public class StudySession
             }
 
             StartStudySession(stackId);
-            
+
             connection.Close();
         }
     }
 
     private static void StartStudySession(int stackId)
     {
+        int numCorrectAnswers = 0;
+        
+        List<FlashcardDTO> flashcards = GetRandomFlashCards(stackId,out string numFlashcards);
+
+        foreach (var flashcard in flashcards)
+        {
+            Console.WriteLine($"Q:{flashcard.Question}");
+            Console.WriteLine("Input your answer:");
+            string userAnswer = Console.ReadLine();
+
+            if (userAnswer == flashcard.Answer)
+            {
+                Console.WriteLine("Your answer was correct");
+                numCorrectAnswers++;
+            }
+            else
+            {
+                Console.WriteLine("Your answer was incorrect");
+                Console.WriteLine($"Your answer:{userAnswer} | Correct answer:{flashcard.Answer}");
+            }
+        }
+        Console.WriteLine($"You got {numCorrectAnswers} out of {numFlashcards} flashcards correct!");
+        Console.WriteLine("Press any key to continue");
+        Console.ReadLine();
+    }
+
+private static List<FlashcardDTO> GetRandomFlashCards(int stackId, out string numFlashcards)
+    {
         Console.WriteLine("Input how many flashcards you want to study");
-        string numFlashcards = Console.ReadLine();
+        numFlashcards = Console.ReadLine();
         
         int numCorrectAnswers = 0;
-
-        string question;
-        string answer;
-
+        
         string userAnswer;
         string query =
             $"SELECT TOP {numFlashcards} FlashcardId, Question, Answer FROM Flashcards WHERE StackId = {stackId} ORDER BY NEWID()";
+        
+        List<FlashcardDTO> flashcards = new List<FlashcardDTO>();
         
         using (SqlConnection connection = new SqlConnection(connectionString))
         {
@@ -81,34 +109,18 @@ public class StudySession
                 {
                     while (reader.Read())
                     {
-                        question = reader.GetString(1); // Assuming StackId is in the first column
-                        answer = reader.GetString(2);
-                        
-                        Console.Clear();
-                        Console.WriteLine($"Q:{question}");
-                        Console.WriteLine("Input your answer:");
-                        userAnswer = Console.ReadLine();
+                        FlashcardDTO flashcard = new FlashcardDTO
+                        {
+                            Question = reader.GetString(1),
+                            Answer = reader.GetString(2)
+                        };
 
-                        if (userAnswer == answer)
-                        {
-                            Console.WriteLine("Your answer was correct");
-                            numCorrectAnswers++;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Your answer was incorrect");
-                            Console.WriteLine($"Your answer:{userAnswer} | Correct answer:{answer}");
-                        }
-                        
-                        Console.WriteLine("Press any key to continue");
-                        Console.ReadLine();
+                        flashcards.Add(flashcard);
                     }
                 }
-                Console.WriteLine($"You got {numCorrectAnswers} out of {numFlashcards} flashcards correct!");
-                Console.WriteLine("Press any key to continue");
-                Console.ReadLine();
             }
             connection.Close();
         }
+        return flashcards;
     }
 }
