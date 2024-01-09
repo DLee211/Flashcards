@@ -37,9 +37,10 @@ public class UserInput
                 case "3": 
                     StudySession.Study(); 
                     break;
-                // case "4":
-                //     ViewStudyData();
-                //     break;
+                case "4":
+                    Console.Clear();
+                    StudySessionRepository.ViewRecords();
+                    break;
             }
         }
     }

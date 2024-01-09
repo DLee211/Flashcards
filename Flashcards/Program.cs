@@ -16,6 +16,9 @@ namespace Flashcards
                                             "       Answer NVARCHAR(255)," +
                                             "       StackId INT FOREIGN KEY REFERENCES Stacks(StackId))";
 
+        private static string createStudySessionRecords =
+            "CREATE TABLE StudySessions (SessionId INT PRIMARY KEY IDENTITY(1,1),  StackId INT, StackName NVARCHAR(255), correctAnswers INT, totalAnswers INT, Date DATETIME,CONSTRAINT FK_Stack FOREIGN KEY (StackId) REFERENCES Stacks(StackId));";
+
         static void Main(string[] args)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -36,6 +39,12 @@ namespace Flashcards
                         command.ExecuteNonQuery();
                         Console.WriteLine("Flashcards table created successfully!");
                     }
+                    
+                    using (SqlCommand command = new SqlCommand(createStudySessionRecords, connection))
+                    {
+                        command.ExecuteNonQuery();
+                        Console.WriteLine("StudySessionRecords table created successfully!");
+                    }
 
                     Console.WriteLine("Connected to LocalDB successfully.");
 
@@ -48,7 +57,6 @@ namespace Flashcards
                     Console.WriteLine("Error: " + ex.Message);
                 }
             }
-
             UserInput.Input();
         }
     }

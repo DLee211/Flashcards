@@ -53,13 +53,13 @@ public class StudySession
                 }
             }
 
-            StartStudySession(stackId);
+            StartStudySession(stackId,stackName);
 
             connection.Close();
         }
     }
 
-    private static void StartStudySession(int stackId)
+    private static void StartStudySession(int stackId, string stackName)
     {
         int numCorrectAnswers = 0;
         
@@ -85,6 +85,9 @@ public class StudySession
         Console.WriteLine($"You got {numCorrectAnswers} out of {numFlashcards} flashcards correct!");
         Console.WriteLine("Press any key to continue");
         Console.ReadLine();
+
+        StudySessionRepository.InsertStudySessionRecords(stackId,stackName, numCorrectAnswers, int.Parse(numFlashcards));
+
     }
 
 private static List<FlashcardDTO> GetRandomFlashCards(int stackId, out string numFlashcards)
