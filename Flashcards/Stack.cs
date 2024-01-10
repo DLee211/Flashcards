@@ -15,7 +15,7 @@ public class Stack
         ViewStacks();
 
         Console.WriteLine("---------------------------");
-        Console.WriteLine("Input a current stack name");
+        Console.WriteLine("Input new stack name to add");
         Console.WriteLine("Or input 0 to exit input.");
         Console.WriteLine("---------------------------");
 
@@ -39,7 +39,6 @@ public class Stack
                         Console.WriteLine("Press Enter to continue:");
                         Console.ReadLine();
                     }
-
                     connection.Close();
                 }
                 break;

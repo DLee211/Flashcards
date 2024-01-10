@@ -3,9 +3,9 @@
 public class UserInput
 {
     private static string connectionString = @"Data Source = (localdb)\MSSQLLocalDB;Integrated Security=True";
-    public static bool closeApp = false;    
     public static void Input()
     {
+        bool closeApp = false;   
         Console.Clear();
         Console.WriteLine("\nMain Menu");
         Console.WriteLine("What do you want to do?");
@@ -21,26 +21,37 @@ public class UserInput
 
         while (closeApp == false)
         {
-
-            switch (command)
+            if (int.TryParse(command, out int userInput))
             {
-                case "0":
-                    closeApp = true;
-                    Environment.Exit(0);
-                    break;
-                case "1":
-                    Stack.ManageStacks();
-                    break;
-                case "2":
-                    Flashcard.ManageFlashCards();
-                    break;
-                case "3": 
-                    StudySession.Study(); 
-                    break;
-                case "4":
-                    Console.Clear();
-                    StudySessionRepository.ViewRecords();
-                    break;
+                switch (userInput)
+                {
+                    case 0:
+                        closeApp = true;
+                        Environment.Exit(0);
+                        break;
+                    case 1:
+                        Stack.ManageStacks();
+                        break;
+                    case 2:
+                        Flashcard.ManageFlashCards();
+                        break;
+                    case 3:
+                        StudySession.Study();
+                        break;
+                    case 4:
+                        Console.Clear();
+                        StudySessionRepository.ViewRecords();
+                        break;
+                    default:
+                        Console.WriteLine("Invalid input. Please enter a number between 0 and 4.");
+                        command = Console.ReadLine();
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid Input, Please enter a valid integer");
+                command = Console.ReadLine();
             }
         }
     }
