@@ -21,6 +21,8 @@ public class Flashcard
         Console.WriteLine("-------------------------------");
         
         string stackName= Console.ReadLine();
+        
+        Validation.CheckIfStackNameExists(stackName, out bool exists);
 
         switch (stackName)
         {
@@ -29,9 +31,17 @@ public class Flashcard
                 break;
             
             default:
-                string query = $"SELECT StackId FROM Stacks WHERE StackName ='{stackName}'";
-
-                ChooseStack(query, stackName);
+                if (exists)
+                {
+                    string query = $"SELECT StackId FROM Stacks WHERE StackName ='{stackName}'";
+                    ChooseStack(query, stackName);
+                }
+                else
+                {
+                    Console.WriteLine("Stack doesn't exist. Press Enter to continue.");
+                    Console.ReadLine();
+                    ManageFlashCards();
+                }
                 break;
         }
     }
@@ -119,31 +129,49 @@ public class Flashcard
 
     private static void EditFlashcard(int stackId)
     {
+        int Id;
         Console.WriteLine("Input the Id of the flashcard you want to edit:");
 
-        int continuousFlashcardId = int.Parse(Console.ReadLine());
-
-        Console.WriteLine("Input in the new question:");
-
-        string newQuestion = Console.ReadLine();
-
-        Console.WriteLine("Input the new answer:");
-
-        string newAnswer = Console.ReadLine();
-
-        string query =
-            $"DECLARE @stackId INT = {stackId}; DECLARE @continuousFlashcardId INT = {continuousFlashcardId}; UPDATE Flashcards SET Question = '{newQuestion}', Answer = '{newAnswer}' WHERE FlashcardId = (SELECT FlashcardId FROM(SELECT FlashcardId, ROW_NUMBER() OVER (ORDER BY FlashcardId) AS ContinuousFlashcardId FROM Flashcards WHERE StackId =  @stackId) AS NumberedFlashcards WHERE ContinuousFlashcardId = @continuousFlashcardId) AND StackId = @stackId;";
-
-        using (SqlConnection connection = new SqlConnection(connectionString))
+        string continuousFlashcardId = Console.ReadLine();
+        
+        while (!int.TryParse(continuousFlashcardId, out Id))
         {
-            connection.Open();
+            Console.WriteLine("Id has to be an integer!");
+            continuousFlashcardId = Console.ReadLine();
+        }
+        
+        Validation.CheckIfFlashCardExists(Id, stackId, out bool exists);
+
+        if (exists)
+        {
+
+            Console.WriteLine("Input in the new question:");
+
+            string newQuestion = Console.ReadLine();
+
+            Console.WriteLine("Input the new answer:");
+
+            string newAnswer = Console.ReadLine();
+
+            string query =
+                $"DECLARE @stackId INT = {stackId}; DECLARE @continuousFlashcardId INT = {Id}; UPDATE Flashcards SET Question = '{newQuestion}', Answer = '{newAnswer}' WHERE FlashcardId = (SELECT FlashcardId FROM(SELECT FlashcardId, ROW_NUMBER() OVER (ORDER BY FlashcardId) AS ContinuousFlashcardId FROM Flashcards WHERE StackId =  @stackId) AS NumberedFlashcards WHERE ContinuousFlashcardId = @continuousFlashcardId) AND StackId = @stackId;";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                using (SqlCommand command = new SqlCommand(query, connection))
+                connection.Open();
                 {
-                    command.ExecuteNonQuery();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
                 }
+                connection.Close();
             }
-            connection.Close();
+        }
+        else
+        {
+            Console.WriteLine("Flashcard does not exist. Press press enter to continue");
+            Console.ReadLine();
         }
     }
 
@@ -180,20 +208,29 @@ public class Flashcard
             Console.WriteLine("Id has to be an integer!");
             id = Console.ReadLine();
         }
-
-        string query =
-            $"DECLARE @YourFlashcardId INT; SELECT @YourFlashcardId = FlashcardId FROM (SELECT FlashcardId, ROW_NUMBER() OVER (ORDER BY FlashcardId) AS ContinuousFlashcardId FROM Flashcards WHERE StackId = {stackId}) AS NumberedFlashcards WHERE ContinuousFlashcardId = {Id}; DELETE FROM Flashcards WHERE FlashcardId = @YourFlashcardId AND StackId = {stackId}";
-
-        using (SqlConnection connection = new SqlConnection(connectionString))
+        
+        Validation.CheckIfFlashCardExists(Id,stackId, out bool exists);
+        if (exists)
         {
-            connection.Open();
+            string query =
+                $"DECLARE @YourFlashcardId INT; SELECT @YourFlashcardId = FlashcardId FROM (SELECT FlashcardId, ROW_NUMBER() OVER (ORDER BY FlashcardId) AS ContinuousFlashcardId FROM Flashcards WHERE StackId = {stackId}) AS NumberedFlashcards WHERE ContinuousFlashcardId = {Id}; DELETE FROM Flashcards WHERE FlashcardId = @YourFlashcardId AND StackId = {stackId}";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                using (SqlCommand command = new SqlCommand(query, connection))
+                connection.Open();
                 {
-                    command.ExecuteNonQuery();
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.ExecuteNonQuery();
+                    }
                 }
+                connection.Close();
             }
-            connection.Close();
+        }
+        else
+        {
+            Console.WriteLine("Flashcard does not exist! Press enter to continue");
+            Console.ReadLine();
         }
     }
 
@@ -263,4 +300,37 @@ public class Flashcard
         
         currentStackFlashCards(stackName, stackId);
     }
+
+    public static void DeleteStackFlashcards(string? stackNameToDelete)
+    {
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            int stackId;
+            connection.Open();
+
+            string query = $"SELECT StackId FROM Stacks WHERE StackName = '{stackNameToDelete}'";
+
+            using (SqlCommand command = new SqlCommand(query, connection))
+            {
+                object result = command.ExecuteScalar();
+
+                if (result != null)
+                {
+                    stackId = Convert.ToInt32(result);
+                    string deleteFlashcardsQuery = $"DELETE FROM Flashcards WHERE StackId = {stackId}";
+                    using (SqlCommand deleteCommand = new SqlCommand(deleteFlashcardsQuery, connection))
+                    {
+                        deleteCommand.Parameters.AddWithValue("@StackId", stackId);
+                        deleteCommand.ExecuteNonQuery();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"No stack found with the name '{stackNameToDelete}'.");
+                }
+            }
+
+            connection.Close();
+        }
+    } 
 }

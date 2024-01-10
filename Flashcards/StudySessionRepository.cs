@@ -80,4 +80,39 @@ public class StudySessionRepository
             UserInput.Input();
         }
     }
+
+    public static void DeleteStudySession(string? stackNameToDelete)
+    {
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+
+            int stackId;
+            connection.Open();
+
+            string query = "SELECT StackId FROM Stacks WHERE StackName = @StackName";
+
+            using (SqlCommand command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@StackName", stackNameToDelete);
+
+                object result = command.ExecuteScalar();
+
+                if (result != null)
+                {
+                    stackId = Convert.ToInt32(result);
+                    string deleteStudySessionsQuery = $"DELETE FROM StudySessions WHERE StackId = {stackId}";
+                    using (SqlCommand deleteStudyCommand = new SqlCommand(deleteStudySessionsQuery, connection))
+                    {
+                        deleteStudyCommand.Parameters.AddWithValue("@StackId", stackId);
+                        deleteStudyCommand.ExecuteNonQuery();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"No stack found with the name '{stackNameToDelete}'.");
+                }
+            }
+            connection.Close();
+        }
+    }
 }

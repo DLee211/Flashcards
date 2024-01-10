@@ -19,6 +19,8 @@ public class StudySession
         Console.WriteLine("-------------------------------");
 
         string stackName = Console.ReadLine();
+        
+        Validation.CheckIfStackNameExists(stackName, out bool exists);
 
         switch (stackName)
         {
@@ -27,9 +29,19 @@ public class StudySession
                 break;
 
             default:
-                string query = $"SELECT StackId FROM Stacks WHERE StackName ='{stackName}'";
+                if (exists)
+                {
+                    string query = $"SELECT StackId FROM Stacks WHERE StackName ='{stackName}'";
 
-                ChooseStackForStudy(query, stackName);
+                    ChooseStackForStudy(query, stackName);
+                }
+                else
+                {
+                    Console.WriteLine("Stack name does not exist. Press enter to continue");
+                    Console.ReadLine();
+                    Study();
+                }
+
                 break;
         }
     }
