@@ -123,6 +123,11 @@ public class Flashcard
                     ViewAllFlashCards(stackName,stackId);
                     DeleteFlashcard( stackId);
                     break;
+                
+                default:
+                    Console.WriteLine("Invalid input. Please enter a valid input. Press enter to continue.");
+                    Console.ReadLine();
+                    break;
             }
         }
     }
