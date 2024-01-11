@@ -97,29 +97,35 @@ public class Flashcard
                     break;
 
                 case "x":
+                    Console.Clear();
                     ManageFlashCards();
                     break;
 
                 case "v":
+                    Console.Clear();
                     ViewAllFlashCards(stackName, stackId);
                     Console.ReadLine();
                     currentStackFlashCards(stackName, stackId);
                     break;
 
                 case "a":
+                    Console.Clear();
                     ViewXAmountOfCards(stackId);
                     break;
 
                 case "c":
+                    Console.Clear();
                     CreateFlashcard(stackName, stackId);
                     break;
 
                 case "e":
+                    Console.Clear();
                     ViewAllFlashCards(stackName, stackId);
                     EditFlashcard(stackId);
                     break;
 
                 case "d":
+                    Console.Clear();
                     ViewAllFlashCards(stackName,stackId);
                     DeleteFlashcard( stackId);
                     break;

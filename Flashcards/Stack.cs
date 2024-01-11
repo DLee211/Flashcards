@@ -128,15 +128,18 @@ public class Stack
                     break;
 
                 case "v":
+                    Console.Clear();
                     ViewStacks();
                     Console.ReadLine();
                     break;
 
                 case "c":
+                    Console.Clear();
                     AddStacks();
                     break;
 
                 case "d":
+                    Console.Clear();
                     DeleteStack();
                     break;
             }
@@ -164,6 +167,7 @@ public class Stack
                         break;
 
                     default:
+                        Console.Clear();
                         Validation.CheckIfStackNameExists(stackNameToDelete, out bool exists);
                         if (exists)
                         {
