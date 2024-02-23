@@ -5,7 +5,7 @@ namespace Flashcards;
 
 public class StudySessionRepository
 {
-    private static string connectionString = @"Data Source = (localdb)\MSSQLLocalDB;Integrated Security=True";
+    private static string connectionString = @"";
     
     public static void InsertStudySessionRecords(int stackId, string stackName, int correctAnswers, int totalAnswers)
     {
